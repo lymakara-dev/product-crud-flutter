@@ -5,8 +5,6 @@ import 'package:frontend/screens/product_list_sreen.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
-  // await dotenv.load(fileName: ".env");
-
   try {
     await dotenv.load(fileName: ".env");
     print("✅ .env loaded: ${dotenv.env}");
