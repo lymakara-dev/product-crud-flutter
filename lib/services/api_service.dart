@@ -7,9 +7,22 @@ String get baseUrl => dotenv.env['API_URL'] ?? 'http://localhost:3000';
 
 class ApiService {
   static Future<List<Product>> getProducts() async {
-    final response = await http.get(Uri.parse('$baseUrl/products'));
-    final List data = json.decode(response.body);
-    return data.map((json) => Product.fromJson(json)).toList();
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/products'));
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        return data.map((json) => Product.fromJson(json)).toList();
+      } else {
+        print('Failed to load products: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching products: $e');
+      return [];
+    }
   }
 
   static Future<Product> getProduct(int id) async {

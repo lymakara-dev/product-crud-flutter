@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/constants/app_colors.dart';
 import 'package:frontend/models/porduct.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
@@ -30,7 +31,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Product")),
+      appBar: AppBar(
+        title: Text(
+          "Add Product",
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Form(
@@ -64,7 +73,24 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 onSaved: (val) => _stock = int.parse(val!),
               ),
               SizedBox(height: 20),
-              ElevatedButton(onPressed: _submit, child: Text("Create")),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: Text("Create", style: TextStyle(color: Colors.white)),
+                ),
+              ),
             ],
           ),
         ),

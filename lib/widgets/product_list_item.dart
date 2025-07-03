@@ -18,12 +18,24 @@ class ProductListItem extends StatelessWidget {
     return ListTile(
       title: Text(product.name),
       subtitle: Text('Price: \$${product.price} | Stock: ${product.stock}'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(icon: Icon(Icons.edit), onPressed: onEdit),
-          IconButton(icon: Icon(Icons.delete), onPressed: onDelete),
-        ],
+      trailing: PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 8,
+        color: Colors.white,
+        offset: Offset(0, 40),
+        onSelected: (value) {
+          if (value == 'edit') {
+            onEdit();
+          } else if (value == 'delete') {
+            onDelete();
+          }
+        },
+        itemBuilder:
+            (context) => [
+              PopupMenuItem(value: 'edit', child: Text('Edit')),
+              PopupMenuItem(value: 'delete', child: Text('Delete')),
+            ],
       ),
     );
   }

@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/constants/app_colors.dart';
 import 'package:frontend/screens/edit_product_sreen.dart';
-import 'package:frontend/widgets/export_button.dart';
+import 'package:frontend/utils/pdf_export.dart';
+import 'package:frontend/widgets/confirm_delete_dialog.dart';
 import 'package:frontend/widgets/product_list_item.dart';
-import 'package:frontend/widgets/sort_dropdown.dart';
+import 'package:frontend/widgets/search_bar.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import 'add_product_screen.dart';
@@ -15,9 +17,9 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  String _sortOption = 'Price';
+  String _sortOption = 'Name';
 
   @override
   void initState() {
@@ -49,24 +51,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void _confirmDelete(BuildContext context, int id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: Text("Delete Product?"),
-            content: Text("Are you sure you want to delete this product?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text("Delete"),
-              ),
-            ],
-          ),
-    );
+    final confirm = await showConfirmDeleteDialog(context);
 
     if (confirm ?? false) {
       await Provider.of<ProductProvider>(
@@ -79,7 +64,36 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Product List")),
+      appBar: AppBar(
+        title: Text(
+          "Product List",
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.download),
+            tooltip: 'Export to PDF',
+            onPressed: () {
+              final products =
+                  Provider.of<ProductProvider>(context, listen: false).products;
+              exportToPdf(products);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Add Product',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddProductScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -88,13 +102,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
           return Column(
             children: [
-              SearchBar(
+              ProductSearchBar(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-              ),
-              SortDropdown(
-                value: _sortOption,
-                onChanged: (val) {
+                onSortSelected: (val) {
                   setState(() => _sortOption = val);
                   Provider.of<ProductProvider>(
                     context,
@@ -102,7 +113,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ).sortBy(val);
                 },
               ),
-              ExportButton(products: provider.products),
+
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: _refresh,
@@ -129,15 +140,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ],
           );
         },
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed:
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => AddProductScreen()),
-            ),
       ),
     );
   }
